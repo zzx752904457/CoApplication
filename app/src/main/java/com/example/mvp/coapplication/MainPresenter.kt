@@ -84,18 +84,9 @@ class MainPresenter(view: IMainView) : BaseLifecyclePresenter<IMainView>(view) {
     fun getDataByMainScope() {
         mainJob?.cancel()
         mainJob = requestData {
-            Log.e("协程测试", "开始执行getConcurrentDataByMainScope()")
             val hotKeys =
                 operateResult(HttpFactory.instance.getService().getHotKeys()) ?: return@requestData
             setLiveDataKeyAndValue(KEY_MAIN, hotKeys)
-        }
-        requestData {
-            repeat(20) {
-                Log.e("协程测试", "2开始执行$it")
-            }
-        }
-        repeat(20) {
-            Log.e("协程测试", "1开始执行$it")
         }
     }
 

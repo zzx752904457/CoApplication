@@ -2,6 +2,7 @@ package com.example.mvp.coapplication.base
 
 import android.os.Looper
 import android.util.Log
+import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.*
 import kotlinx.coroutines.*
@@ -92,6 +93,7 @@ open class BaseLifecyclePresenter<V : IBaseView>(protected val view: V) : BaseLi
     }
 
     protected fun requestData(
+        showToast : Boolean = true,
         errorCallBack: ((errorCode: Int, errorMsg: String) -> Unit)? = null,
         block: suspend CoroutineScope.() -> Unit
     ): Job {
@@ -101,38 +103,51 @@ open class BaseLifecyclePresenter<V : IBaseView>(protected val view: V) : BaseLi
             } catch (e: Exception) {
                 if (e is CancellationException) {
                     Log.e("协程测试", "请求取消")
-                } else {
-                    var errorMsg = e.message
-                    if (!errorMsg.isNullOrEmpty() && errorMsg.contains("errorCode:")) {
-                        val errorCode = errorMsg.substring(10, errorMsg.indexOf(",")).toInt()
-                        errorMsg = errorMsg.substring(errorMsg.indexOf("errorMsg:") + 9)
-                        if (errorCode == CODE_UN_LOGIN || errorCode == CODE_LOGIN_TIMEOUT) {
-                            login()
-                        } else {
-                            if (errorCallBack == null) {
-                                showError(errorCode, errorMsg)
-                            } else {
-                                errorCallBack.invoke(errorCode, errorMsg)
-                            }
-                        }
+                } else if (e is UnexpectCodeException) {
+                    val errorMsg = e.errorMessage ?: "网络错误"
+                    val errorCode = e.errorCode
+                    if (errorCode == CODE_UN_LOGIN || errorCode == CODE_LOGIN_TIMEOUT) {
+                        login()
                     } else {
                         if (errorCallBack == null) {
-                            showError(-1, errorMsg ?: "网络错误")
+                            showError(errorCode, errorMsg)
                         } else {
-                            errorCallBack.invoke(-1, errorMsg ?: "网络错误")
+                            errorCallBack.invoke(errorCode, errorMsg)
                         }
+                    }
+                    if (showToast) {
+                        Toast.makeText()
+                    }
+                } else {
+                    if (errorCallBack == null) {
+                        showError(-1, "网络错误")
+                    } else {
+                        errorCallBack.invoke(-1, "网络错误")
+                    }
+                    if (showToast) {
+                        Toast.makeText()
                     }
                 }
             }
         }
     }
 
-    protected fun <T> operateResult(result: Result<T>): T? {
-        when {
-            result.errorCode == 0 -> return result.data
-            else -> throw Exception(
-                "errorCode:${result.errorCode},errorMsg:${result.errorMsg ?: "请求出错"}"
-            )
+    protected fun <T> operateResult(result: Result<T>, needUnexpectedResult: Boolean = false): T? {
+        when (result.errorCode) {
+            0 -> {
+                return result.data
+            }
+            else -> {
+                if (needUnexpectedResult) {
+                    return result.data
+                } else {
+                    throw UnexpectCodeException().apply {
+                        errorCode = result.errorCode
+                        errorMessage = result.errorMsg
+                        jsonStr = if (result.data == null) null else result.data.toString()
+                    }
+                }
+            }
         }
     }
 
