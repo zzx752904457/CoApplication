@@ -61,6 +61,14 @@ class MainPresenter(view: IMainView) : BaseLifecyclePresenter<IMainView>(view) {
         }
     }
 
+    /**
+     * @method  getData
+     * @description  基础使用，不做任何封装
+     * @date: 2020/7/29 2:21 PM
+     * @author: ZhaoXuan.Zeng
+     * @param []
+     * @return
+     */
     fun getData() {
         launch {
             try {
@@ -80,6 +88,14 @@ class MainPresenter(view: IMainView) : BaseLifecyclePresenter<IMainView>(view) {
         }
     }
 
+    /**
+     * @method  getOriginalResult
+     * @description  获取原始接口结果
+     * @date: 2020/7/29 2:21 PM
+     * @author: ZhaoXuan.Zeng
+     * @param []
+     * @return
+     */
     fun getOriginalResult() {
         requestData {
             val body = HttpFactory.instance.getService().getHotKeys2()
