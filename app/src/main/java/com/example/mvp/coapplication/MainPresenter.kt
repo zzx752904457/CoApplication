@@ -74,6 +74,11 @@ class MainPresenter(view: IMainView) : BaseLifecyclePresenter<IMainView>(view) {
             try {
                 //Retrofit内部处理了线程间的切换调度，所以我们只需要关心结果就行了
                 val result = HttpFactory.instance.getService().getHotKeys()
+
+                //如果是我们自己做一个耗时操作然后回调给主线程拿到结果，应该这么做
+                val result2 = withContext(Dispatchers.Default) {
+                    HttpFactory.instance.getService().getHotKeys()
+                }
             } catch (e: Exception) {
                 //协程没有回调，所以内部报错或者网络错误等都是通过抛异常的方式来实现，所以使用try catch
                 e.printStackTrace()
