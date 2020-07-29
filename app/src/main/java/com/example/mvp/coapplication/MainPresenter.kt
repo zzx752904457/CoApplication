@@ -110,6 +110,7 @@ class MainPresenter(view: IMainView) : BaseLifecyclePresenter<IMainView>(view) {
         launch {
             val t1 = System.currentTimeMillis()
             val map = hashMapOf<Int, Int>()
+            //切换到子线程做操作
             withContext(Dispatchers.Default) {
                 repeat(50000000) {
                     map[0] = it
