@@ -12,43 +12,9 @@
         android:layout_height="60dp"
         android:text="发起MainScope请求"
         android:textAllCaps="false"
-        app:layout_constraintBottom_toTopOf="@+id/btn_live_data_request"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent"
         app:layout_constraintTop_toTopOf="parent" />
-
-    <Button
-        android:id="@+id/btn_live_data_request"
-        android:layout_width="240dp"
-        android:layout_height="60dp"
-        android:text="发起LiveDataScope请求"
-        android:textAllCaps="false"
-        app:layout_constraintBottom_toTopOf="@+id/btn_serial_request"
-        app:layout_constraintLeft_toLeftOf="parent"
-        app:layout_constraintRight_toRightOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/btn_main_scope" />
-
-    <Button
-        android:id="@+id/btn_serial_request"
-        android:layout_width="240dp"
-        android:layout_height="60dp"
-        android:text="发起串行请求"
-        android:textAllCaps="false"
-        app:layout_constraintBottom_toTopOf="@+id/btn_concurrent_request_1"
-        app:layout_constraintLeft_toLeftOf="parent"
-        app:layout_constraintRight_toRightOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/btn_live_data_request" />
-
-    <Button
-        android:id="@+id/btn_concurrent_request_1"
-        android:layout_width="240dp"
-        android:layout_height="60dp"
-        android:text="发起并发请求1"
-        android:textAllCaps="false"
-        app:layout_constraintBottom_toTopOf="@+id/btn_concurrent_request_2"
-        app:layout_constraintLeft_toLeftOf="parent"
-        app:layout_constraintRight_toRightOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/btn_serial_request" />
 
     <Button
         android:id="@+id/btn_concurrent_request_2"
@@ -59,7 +25,7 @@
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintLeft_toLeftOf="parent"
         app:layout_constraintRight_toRightOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/btn_concurrent_request_1" />
+        app:layout_constraintTop_toBottomOf="@+id/btn_main_scope" />
 
     <Button
         android:id="@+id/btn_open"
@@ -67,7 +33,8 @@
         android:layout_height="50dp"
         android:text="跳转列表页"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintBottom_toBottomOf="parent"
+        />
 
     <Button
         android:id="@+id/btn_dispatch"
@@ -75,6 +42,6 @@
         android:layout_height="50dp"
         android:text="执行调度器"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        app:layout_constraintBottom_toBottomOf="parent" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

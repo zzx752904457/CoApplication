@@ -2,7 +2,10 @@ package com.example.mvp.coapplication
 
 import android.content.Intent
 import android.os.Bundle
+import android.os.Handler
+import android.os.Message
 import android.util.Log
+import android.widget.TextView
 import android.widget.Toast
 import com.example.mvp.coapplication.base.BaseLifecycleActivity
 import com.example.mvp.coapplication.bean.Article
@@ -22,22 +25,10 @@ class MainActivity : BaseLifecycleActivity<MainPresenter>(), IMainView {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        mPresenter.getDataByLifecycleScope()
+//        mPresenter.getDataByLifecycleScope()
 
         btn_main_scope.setOnClickListener {
             mPresenter.getDataByMainScope()
-        }
-
-        btn_live_data_request.setOnClickListener {
-            mPresenter.getDataByLiveDataScope()
-        }
-
-        btn_serial_request.setOnClickListener {
-            mPresenter.getDataBySerial()
-        }
-
-        btn_concurrent_request_1.setOnClickListener {
-            mPresenter.getDataByConcurrent1()
         }
 
         btn_concurrent_request_2.setOnClickListener {
@@ -53,6 +44,7 @@ class MainActivity : BaseLifecycleActivity<MainPresenter>(), IMainView {
                 Toast.makeText(this@MainActivity, "启动列表页", Toast.LENGTH_SHORT).show()
             })
         }
+
     }
 
     override fun getDataByMainScopeSucceed(dataList: List<HotKey>) {

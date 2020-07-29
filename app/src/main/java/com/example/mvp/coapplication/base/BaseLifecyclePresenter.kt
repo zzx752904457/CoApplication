@@ -102,7 +102,7 @@ open class BaseLifecyclePresenter<V : IBaseView>(protected val view: V) : BaseLi
                 block.invoke(this)
             } catch (e: Exception) {
                 if (e is CancellationException) {
-                    Log.e("协程测试", "请求取消")
+                    Log.e("协程测试", "取消协程作用域")
                 } else if (e is UnexpectCodeException) {
                     val errorMsg = e.errorMessage ?: "网络错误"
                     val errorCode = e.errorCode
@@ -116,7 +116,6 @@ open class BaseLifecyclePresenter<V : IBaseView>(protected val view: V) : BaseLi
                         }
                     }
                     if (showToast) {
-                        Toast.makeText()
                     }
                 } else {
                     if (errorCallBack == null) {
@@ -125,7 +124,6 @@ open class BaseLifecyclePresenter<V : IBaseView>(protected val view: V) : BaseLi
                         errorCallBack.invoke(-1, "网络错误")
                     }
                     if (showToast) {
-                        Toast.makeText()
                     }
                 }
             }

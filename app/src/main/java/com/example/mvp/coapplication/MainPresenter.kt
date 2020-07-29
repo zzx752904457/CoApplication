@@ -1,16 +1,11 @@
 package com.example.mvp.coapplication
 
 import android.util.Log
-import androidx.lifecycle.LifecycleOwner
-import androidx.lifecycle.Observer
-import androidx.lifecycle.liveData
 import com.example.mvp.coapplication.base.BaseLifecyclePresenter
 import com.example.mvp.coapplication.base.IBaseView
-import com.example.mvp.coapplication.base.Result
 import com.example.mvp.coapplication.bean.Article
 import com.example.mvp.coapplication.bean.Banner
 import com.example.mvp.coapplication.bean.HotKey
-import com.example.mvp.coapplication.bean.PageBean
 import com.example.mvp.coapplication.http.HttpFactory
 import kotlinx.coroutines.*
 import java.lang.Exception
@@ -36,16 +31,6 @@ class MainPresenter(view: IMainView) : BaseLifecyclePresenter<IMainView>(view) {
         const val KEY_SERIAL = "KEY_SERIAL"
 
         const val KEY_CONCURRENT = "KEY_CONCURRENT"
-    }
-
-    override fun onCreate() {
-        super.onCreate()
-//        launch {
-//            while (true) {
-//                delay(2000)
-//                Log.e("协程测试", "隔了两秒执行该方法")
-//            }
-//        }
     }
 
     override fun onLiveDataObserver(key: String, values: List<Any?>) {
@@ -76,103 +61,29 @@ class MainPresenter(view: IMainView) : BaseLifecyclePresenter<IMainView>(view) {
         }
     }
 
-    override fun onResume(owner: LifecycleOwner) {
-        super.onResume(owner)
-        Log.e("协程测试", "已经走了onResume")
+    fun getData() {
+        launch {
+            try {
+                //Retrofit内部处理的线程的切换调度，所以我们只需要关心结果就行了
+                val result = HttpFactory.instance.getService().getHotKeys()
+            }catch (e: Exception) {
+                e.printStackTrace()
+            }
+        }
     }
 
     fun getDataByMainScope() {
         mainJob?.cancel()
         mainJob = requestData {
-            val hotKeys =
-                operateResult(HttpFactory.instance.getService().getHotKeys()) ?: return@requestData
+            val hotKeys = operateResult(HttpFactory.instance.getService().getHotKeys()) ?: return@requestData
             setLiveDataKeyAndValue(KEY_MAIN, hotKeys)
         }
     }
 
-    fun getDataByLiveDataScope() {
-        liveData {
-            Log.e("协程测试", "开始执行getDataByLiveDataScope()")
-            try {
-                val banners =
-                    operateResult(HttpFactory.instance.getService().getBanners())
-                        ?: return@liveData
-                emit(banners)
-            } catch (e: Exception) {
-                Log.e("协程测试", e.message ?: "")
-            }
-        }.observe(owner, Observer {
-            view.getDataByLiveDataScopeSucceed(it)
-        })
-    }
-
-    /**
-     * 发起串行请求
-     */
-    fun getDataBySerial() {
+    fun getOriginalResult() {
         requestData {
-            Log.e("协程测试", "开始执行getDataBySerial()")
-            val t1 = System.currentTimeMillis()
-            val dataList = mutableListOf<Article>()
-            for (i in 0 until 30) {
-                dataList.addAll(
-                    operateResult(HttpFactory.instance.getService().getArticles(i))?.datas
-                        ?: continue
-                )
-            }
-            val t2 = System.currentTimeMillis() - t1
-            Log.e("协程测试", t2.toString())
-            setLiveDataKeyAndValue(KEY_SERIAL, dataList)
-        }
-    }
-
-    /**
-     * 发起第一种并行请求
-     */
-    fun getDataByConcurrent1() {
-        requestData {
-            Log.e("协程测试", "开始执行getDataByConcurrent1()")
-            val t1 = System.currentTimeMillis()
-            val deferredList = mutableListOf<Deferred<Result<PageBean<Article>>>>()
-            val dataList = mutableListOf<Article>()
-            repeat(30) {
-                val deferred = async {
-                    HttpFactory.instance.getService().getArticles(it)
-                }
-                deferredList.add(deferred)
-            }
-            for (deferred in deferredList) {
-                dataList.addAll(operateResult(deferred.await())?.datas ?: continue)
-            }
-            val t2 = System.currentTimeMillis() - t1
-            Log.e("协程测试", t2.toString())
-            setLiveDataKeyAndValue(KEY_CONCURRENT, dataList)
-        }
-    }
-
-    /**
-     * 发起第二种并行请求
-     */
-    fun getDataByConcurrent2() {
-        requestData {
-            Log.e("协程测试", "开始执行getDataByConcurrent2()")
-            val t1 = System.currentTimeMillis()
-            try {
-                val deferredList = mutableListOf<Deferred<Result<PageBean<Article>>>>()
-                val dataList = mutableListOf<Article>()
-                repeat(30) {
-                    val deferred = HttpFactory.instance.getService().getArticlesAsync(it)
-                    deferredList.add(deferred)
-                }
-                for (deferred in deferredList) {
-                    dataList.addAll(operateResult(deferred.await())?.datas ?: continue)
-                }
-                val t2 = System.currentTimeMillis() - t1
-                Log.e("协程测试", t2.toString())
-                setLiveDataKeyAndValue(KEY_CONCURRENT, dataList)
-            } catch (e: Exception) {
-                Log.e("协程测试", e.message ?: "")
-            }
+            val body = HttpFactory.instance.getService().getHotKeys2()
+            Log.e("协程测试", body.string())
         }
     }
 
@@ -181,21 +92,30 @@ class MainPresenter(view: IMainView) : BaseLifecyclePresenter<IMainView>(view) {
      */
     fun runThreadDispatch() {
         launch {
-            Log.e("协程测试", "开始执行runThreadDispatch()")
             val t1 = System.currentTimeMillis()
             val map = hashMapOf<Int, Int>()
             withContext(Dispatchers.Default) {
-                Log.e("协程测试", "开始循环: ${Thread.currentThread().name}")
                 repeat(50000000) {
                     map[0] = it
                 }
-                Log.e("协程测试", "结束循环: ${Thread.currentThread().name}")
             }
             val t2 = System.currentTimeMillis() - t1
-            Log.e("协程测试", Thread.currentThread().name)
             Log.e("协程测试", "耗时：$t2")
         }
     }
 
-
+    /**
+     * 发起并行请求
+     */
+    fun getDataByConcurrent2() {
+        requestData {
+            try {
+                val deferred1 = HttpFactory.instance.getService().getArticlesAsync(0)
+                val deferred2 = HttpFactory.instance.getService().getArticlesAsync(1)
+                Log.e("协程测试", "${deferred1.await()}, ${deferred2.await()}")
+            } catch (e: Exception) {
+                Log.e("协程测试", e.message ?: "")
+            }
+        }
+    }
 }

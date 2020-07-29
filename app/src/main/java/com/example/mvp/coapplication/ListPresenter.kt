@@ -38,13 +38,13 @@ class ListPresenter(view: IListView) : BaseLifecyclePresenter<IListView>(view) {
 
     fun loadArticles(loadMore: Boolean = false) {
         listJob?.cancel()
-        listJob = requestData({ errorCode, errorMsg ->
+        listJob = requestData(errorCallBack = { errorCode, errorMsg ->
             if (loadMore) {
                 setLiveDataKeyAndValue(KEY_LOAD_MORE_ERROR)
             } else {
                 showError(errorCode, errorMsg)
             }
-        }, {
+        }){
             //请求数据bean
             val pageBean =
                 operateResult(HttpFactory.instance.getService().getArticles(if (loadMore) page + 1 else 0))
@@ -67,15 +67,7 @@ class ListPresenter(view: IListView) : BaseLifecyclePresenter<IListView>(view) {
                     pageBean.datas
                 )
             }
-        })
+        }
     }
 }
 
-
-
-
-//                if (loadMore) {
-//                    throw Exception("故意抛异常")
-//                } else {
-//                    setLiveDataKeyAndValue(KEY_REFRESH_SUCCEED, pageBean.datas)
-//                }
